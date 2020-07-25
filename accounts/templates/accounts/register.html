@@ -1,0 +1,20 @@
+{% extends "quiz/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+	Quiz App - Register
+{% endblock title %}
+
+{% block content %}
+	<h1>Register</h1>
+	<hr>
+	<form method="post">
+		{% csrf_token %}
+		{{ form|crispy }}
+		<div class="text-muted mb-2">
+			Have an account? <a href="{% url 'accounts:login' %}">Sign In</a>
+		</div>
+		<button type="submit" class="btn btn-primary">Sign Up</button>
+	</form>
+	
+{% endblock content %}

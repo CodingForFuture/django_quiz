@@ -1,0 +1,20 @@
+body {
+	background-color: #feeeee;
+}
+
+.account-img {
+	width: 125px;
+	height: 125px;
+	float: left;
+	border: 1px solid gray;
+}
+
+.profile-info {
+	padding: 10px;
+}
+
+.account-info {
+	float: left;
+	margin-top: 25px;
+	margin-left: 20px;
+}

@@ -1,0 +1,22 @@
+{% extends "quiz/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+	Quiz App - {{ object.username }} Page
+{% endblock title %}
+
+{% block content %}
+	<h1>{{ object.username }} Profile</h1>
+	<hr>
+	<div class="profile-info">
+		<img src="{{ object.profile.image.url }}" class="rounded-circle account-img">
+		<div class="account-info">
+			<p>Username: {{ object.username }}</p>
+			<p>Email: {{ object.email }}</p>
+			{% if user == object %}
+				<a href="{% url 'accounts:edit_profile' %}">Edit Your Profile</a>
+			{% endif %}
+		</div>
+		<div style="clear: both;"></div>
+	</div>
+{% endblock content %}

@@ -1,0 +1,27 @@
+{% extends "quiz/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+	Quiz App - Profile
+{% endblock title %}
+
+{% block content %}
+	<h1>Profile Info</h1>
+	<hr>
+	<div class="profile-info">
+		<img src="{{ user.profile.image.url }}" class="rounded-circle account-img">
+		<div class="account-info">
+			<p>Username: {{ user.username }}</p>
+			<p>Email: {{ user.email }}</p>
+		</div>
+		<div style="clear: both;"></div>
+	</div>
+	
+	<form method="post" enctype="multipart/form-data">
+		{% csrf_token %}
+		{{ user_form|crispy }}
+		{{ profile_form|crispy }}
+		<button type="submit" class="btn btn-primary">Update</button>
+	</form>
+	
+{% endblock content %}

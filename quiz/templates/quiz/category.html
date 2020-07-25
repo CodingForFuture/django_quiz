@@ -1,0 +1,15 @@
+{% extends "quiz/base.html" %}
+
+{% block title %}
+	Quiz App - {{ category }}
+{% endblock title %}
+
+{% block content %}
+	<h1>Hello</h1>
+	{% for quiz in object_list %}
+		<div class="quiz">
+			<h2>{{ quiz.title }}</h2>
+			<hr>
+		</div>
+	{% endfor %}
+{% endblock content %}
