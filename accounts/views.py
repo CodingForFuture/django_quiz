@@ -23,7 +23,7 @@ def register(request):
 
 class BestPlayersListView(ListView):
 	model = Profile
-	ordering = '-points'
+	queryset = Profile.objects.order_by('-points')[:10]
 
 
 def edit_profile(request):
