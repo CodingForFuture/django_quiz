@@ -1,7 +1,8 @@
 from django.contrib import admin
-from .models import Category, Quiz, Question, Answer
+from .models import Category, Quiz, Question, Answer, Comment
 
 admin.site.register(Category)
 admin.site.register(Quiz)
 admin.site.register(Question)
 admin.site.register(Answer)
+admin.site.register(Comment)

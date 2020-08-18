@@ -1,0 +1,9 @@
+<div class="quiz">
+	<h3><a href="{% url 'quiz:detail' quiz.id %}">{{ quiz.title }}</a></h3>
+	<p class="text-muted">Category: {{ quiz.category.name }}</p>
+	<hr>
+	<p>{{ quiz.description }}</p>
+	<p class="text-muted">{{ quiz.date_created }}</p>
+	<hr>
+	<p>Created by <a href="{% url 'accounts:user_view' quiz.author.id %}">{{ quiz.author.username }}</a></p>
+</div>

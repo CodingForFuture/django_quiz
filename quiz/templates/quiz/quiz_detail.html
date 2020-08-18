@@ -1,0 +1,243 @@
+{% extends "quiz/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load shuffle %}
+
+{% block title %}
+	Quiz App - Home
+{% endblock title %}
+
+{% block content %}
+	<div class="quiz">
+		<h3>{{ quiz.title }}</h3>
+		{% if quiz.author == request.user %}
+			<a href="{% url 'quiz:update' quiz.id %}" class="btn btn-secondary btn-sm">Update</a>
+			<!-- Button trigger modal -->
+			<button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#quizModal">
+			  Delete
+			</button>
+
+			<!-- Modal -->
+			<div class="modal fade" id="quizModal" tabindex="-1" role="dialog" aria-labelledby="quizModalLabel" aria-hidden="true">
+			  <div class="modal-dialog" role="document">
+				<div class="modal-content">
+				  <div class="modal-header">
+					<h5 class="modal-title" id="quizModalLabel">Delete Quiz</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					  <span aria-hidden="true">&times;</span>
+					</button>
+				  </div>
+				  <div class="modal-body">
+					Are you sure you want to delete quiz "{{ quiz.title }}"?
+				  </div>
+				  <div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					<form method="POST" action="{% url 'quiz:delete' quiz.id %}">
+						{% csrf_token %}
+						<button type="submit" class="btn btn-danger">Delete</button>
+					</form>
+				  </div>
+				</div>
+			  </div>
+			</div>
+		{% endif %}
+		<hr>
+		<p>{{ quiz.description }}</p>
+		<p class="text-muted">{{ quiz.date_created }}</p>
+		<hr>
+		<p>Created by <a href="{% url 'accounts:user_view' quiz.author.id %}">{{ quiz.author.username }}</a></p>
+		{% if user in quiz.likes.all %}
+			<button class="btn btn-success" id="like"><img src="{% static 'quiz/images/thumb-up.png' %}" class="like-icon"><span id="likes-count">{{ quiz.likes.count }}</span></button>
+		{% else %}
+			<button class="btn btn-info" id="like"><img src="{% static 'quiz/images/thumb-up.png' %}" class="like-icon"><span id="likes-count">{{ quiz.likes.count }}</span></button>
+		{% endif %}
+
+		{% if user in quiz.dislikes.all %}
+			<button class="btn btn-success" id="dislike"><img src="{% static 'quiz/images/thumb-down.png' %}" class="like-icon"><span id="dislikes-count">{{ quiz.dislikes.count }}</span></button>
+		{% else %}
+			<button class="btn btn-info" id="dislike"><img src="{% static 'quiz/images/thumb-down.png' %}" class="like-icon"><span id="dislikes-count">{{ quiz.dislikes.count }}</span></button>
+		{% endif %}
+	</div>
+
+	<div class="quiz">
+		<h3>Questions</h3>
+		<hr>
+		{% if solved %}
+			{% for question_and_answers in solved %}
+				<h6>{{ question_and_answers.0 }}</h6>
+				<ul>
+					{% for answer in question_and_answers.1 %}
+						{% if answer.1 %}
+							<li style="color: green;">{{ answer.0 }}</li>
+						{% elif answer.2 %}
+							<li style="color: red;">{{ answer.0 }}</li>
+						{% else %}
+							<li>{{ answer.0 }}</li>
+						{% endif %}
+					{% endfor %}
+				</ul>
+			{% endfor %}
+			<h5>Points: {{ points }}/{{ solved|length }}</h5>
+		{% else %}
+		<form method="POST">
+			{% csrf_token %}
+			{% for question in quiz.questions.all %}
+				<h6>{{ question.question }}</h6>
+				{% if quiz.author == request.user %}
+					<a href="{% url 'quiz:update_question' question.id %}" class="btn btn-secondary btn-sm">Update</a>
+					<!-- Button trigger modal -->
+					<button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#questionModal{{ question.id }}">
+					  Delete
+					</button>
+
+					<!-- Modal -->
+					<div class="modal fade" id="questionModal{{ question.id }}" tabindex="-1" role="dialog" aria-labelledby="questionModalLabel{{ question.id }}" aria-hidden="true">
+					  <div class="modal-dialog" role="document">
+						<div class="modal-content">
+						  <div class="modal-header">
+							<h5 class="modal-title" id="questionModalLabel{{ question.id }}">Delete Question</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							  <span aria-hidden="true">&times;</span>
+							</button>
+						  </div>
+						  <div class="modal-body">
+							Are you sure you want to delete question "{{ question.question }}"?
+						  </div>
+						  <div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+							<a href="{% url 'quiz:delete_question' question.id %}" class="btn btn-danger">Delete</a>
+						  </div>
+						</div>
+					  </div>
+					</div>
+					<br>
+				{% endif %}
+				{% for answer in question.answers.all|shuffle %}
+					<input type="radio" name="answer{{ question.id }}" id="{{ answer.id }}" value="{{ answer.id }}" required>
+					<label for="{{ answer.answer }}">{{ answer.answer }}</label>
+					<br>
+				{% endfor %}
+			{% empty %}
+				<h6>This quiz don't have any questions yet!</h6>		
+			{% endfor %}
+			{% if quiz.author == request.user %}
+				<a href="{% url 'quiz:create_question' quiz.id %}" class="btn btn-primary">Add question</a>
+			{% endif %}
+			{% if quiz.questions.all %}
+				<button type="submit" class="btn btn-secondary">Check Answers</button>
+			{% endif %}
+		</form>
+		{% endif %}
+	</div>
+	<div class="quiz">
+		<h3>Comments</h3>
+		<hr>
+		{% if user.is_authenticated %}
+			<form action="{% url  'quiz:comment' quiz.id %}" method="POST">
+				{% csrf_token %}
+				{{ form|crispy }}
+				<button type="submit" class="btn btn-primary">Comment</button>
+			</form>
+			<hr>
+		{% endif %}
+		{% for comment in comments %}
+		<div>
+			<h6>
+				<a href="{% url 'accounts:user_view' comment.user.id %}">{{ comment.user.username }}</a>
+				<span class="text-muted">{{ comment.date_commented }}</span>
+			</h6>
+				{% if comment.user == request.user %}
+					<a href="{% url 'quiz:update_comment' comment.id %}" class="btn btn-secondary btn-sm ml-1">Update</a>
+					<!-- Button trigger modal -->
+					<button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#commentModal{{ comment.id }}">
+					  Delete
+					</button>
+
+					<!-- Modal -->
+					<div class="modal fade" id="commentModal{{ comment.id }}" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel{{ comment.id }}" aria-hidden="true">
+					  <div class="modal-dialog" role="document">
+						<div class="modal-content">
+						  <div class="modal-header">
+							<h5 class="modal-title" id="commentModalLabel{{ comment.id }}">Delete Comment</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							  <span aria-hidden="true">&times;</span>
+							</button>
+						  </div>
+						  <div class="modal-body">
+							Are you sure you want to delete comment "{{ comment.comment }}"?
+						  </div>
+						  <div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+							<form method="POST" action="{% url 'quiz:delete_comment' comment.id %}">
+								{% csrf_token %}
+								<button type="submit" class="btn btn-danger">Delete</button>
+							</form>
+						  </div>
+						</div>
+					  </div>
+					</div>
+				{% endif %}
+			<p>{{ comment.comment }}</p>
+		</div>
+		{% endfor %}
+	</div>
+
+	<script>
+		let user = '{{ user }}';
+
+		let like = document.querySelector('#like');
+		let dislike = document.querySelector('#dislike');
+
+		like.onclick = () => {
+			if (user == 'AnonymousUser') {
+				window.location.href = '{% url 'accounts:login' %}'
+			} else {
+				fetch('{% url 'quiz:like' quiz.id %}')
+				.then(response => response.json())
+				.then(data => {
+					if (like.classList.contains('btn-success')) {
+						like.classList.remove('btn-success');
+						like.classList.add('btn-info');
+					} else {
+						like.classList.add('btn-success');
+						like.classList.remove('btn-info');
+						if (dislike.classList.contains('btn-success')) {
+							dislike.classList.remove('btn-success');
+							dislike.classList.add('btn-info');
+						}
+					};
+					console.log(data);
+					document.querySelector('#likes-count').innerHTML = data['likes'];
+					document.querySelector('#dislikes-count').innerHTML = data['dislikes'];
+
+				});
+			};
+
+		};
+
+		dislike.onclick = () => {
+			if (user == 'AnonymousUser') {
+				window.location.href = '{% url 'accounts:login' %}'
+			} else {
+				fetch('{% url 'quiz:dislike' quiz.id %}')
+				.then(response => response.json())
+				.then(data => {
+					if (dislike.classList.contains('btn-success')) {
+						dislike.classList.remove('btn-success');
+						dislike.classList.add('btn-info');
+					} else {
+						dislike.classList.add('btn-success');
+						dislike.classList.remove('btn-info');
+						if (dislike.classList.contains('btn-success')) {
+							like.classList.remove('btn-success');
+							like.classList.add('btn-info');
+						}
+					};
+					console.log(data);
+					document.querySelector('#likes-count').innerHTML = data['likes'];
+					document.querySelector('#dislikes-count').innerHTML = data['dislikes'];
+				});
+			}
+		};
+	</script>
+{% endblock content %}

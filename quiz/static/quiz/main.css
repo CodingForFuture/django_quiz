@@ -18,3 +18,19 @@ body {
 	margin-top: 25px;
 	margin-left: 20px;
 }
+
+.quiz {
+	border: 1px solid gray;
+	margin: 20px 0;
+	padding: 15px;
+	background-color: white;
+}
+
+.quiz a:hover {
+	text-decoration: none;
+}
+
+.like-icon {
+    width: 30px;
+    margin-right: 10px;
+}

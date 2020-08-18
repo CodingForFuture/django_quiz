@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.views.generic import DetailView
+from django.views.generic import DetailView, ListView
+from django.views.generic.list import MultipleObjectMixin
 from .forms import UserRegisterForm, ProfileUpdateForm, UserUpdateForm
+from .models import Profile
 
 
 def register(request):
@@ -17,6 +19,11 @@ def register(request):
 		form = UserRegisterForm()
 
 	return render(request, 'accounts/register.html', dict(form=form))
+
+
+class BestPlayersListView(ListView):
+	model = Profile
+	ordering = '-points'
 
 
 def edit_profile(request):
@@ -38,6 +45,12 @@ def edit_profile(request):
 		dict(profile_form=profile_form, user_form=user_form))
 
 
-class UserDetailView(DetailView):
+class UserDetailView(DetailView, MultipleObjectMixin):
 	model = User
 	template_name = 'accounts/user_detail.html'
+	paginate_by = 5
+
+	def get_context_data(self, **kwargs):
+		object_list = self.get_object().quizzes.all()
+		context = super().get_context_data(object_list=object_list, **kwargs)
+		return context

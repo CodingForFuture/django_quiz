@@ -1,0 +1,32 @@
+{% extends "quiz/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+	Quiz App - Best Players
+{% endblock title %}
+
+{% block content %}
+	<h1>The List of the players who scored the most points</h1>
+	<hr>
+	<table class="table">
+	<thead class="thead-dark">
+		<tr>
+			<th scope="col">Place</th>
+			<th scope="col">Username</th>
+			<th scope="col">Points</th>
+			<th scope="col">Date Joined</th>
+		</tr>
+	</thead>
+	<tbody>
+	{% for profile in object_list %}
+			<tr>
+			  <th scope="row">{{ forloop.counter }}</th>
+			  <td><a href="{% url 'accounts:user_view' profile.user.pk %}">{{ profile.user.username }}</a></td>
+			  <td>{{ profile.points }}</td>
+			  <td>{{ profile.date_joined|date:"M d, Y" }}</td>
+			</tr>
+	{% endfor %}
+	</tbody>
+	</table>
+	{% include "quiz/pagination.html" %}
+{% endblock content %}

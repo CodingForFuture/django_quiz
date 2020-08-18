@@ -13,10 +13,21 @@
 		<div class="account-info">
 			<p>Username: {{ object.username }}</p>
 			<p>Email: {{ object.email }}</p>
-			{% if user == object %}
+			{% if request.user == object %}
 				<a href="{% url 'accounts:edit_profile' %}">Edit Your Profile</a>
 			{% endif %}
 		</div>
 		<div style="clear: both;"></div>
+		<hr>
 	</div>
+	{% for quiz in page_obj %}
+		<div class="quiz">
+			<h3><a href="{% url 'quiz:detail' quiz.id %}">{{ quiz.title }}</a></h3>
+			<p class="text-muted">Category: {{ quiz.category.name }}</p>
+			<hr>
+			<p>{{ quiz.description }}</p>
+			<p class="text-muted">{{ quiz.date_created }}</p>
+		</div>
+	{% endfor %}
+	{% include "quiz/pagination.html" %}
 {% endblock content %}

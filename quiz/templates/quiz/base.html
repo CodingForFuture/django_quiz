@@ -14,7 +14,7 @@
     <title>
       {% block title %}{% endblock %}
     </title>
-    
+  
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -27,25 +27,36 @@
           <li class="nav-item">
             <a class="nav-link" href="{% url 'quiz:home' %}">Home</a>
           </li>
-          {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'accounts:best_players' %}">Best Players</a>
+          </li>
+          {% if request.user.is_authenticated %}
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'accounts:user_view' user.id %}">Profile</a>
+              <a class="nav-link" href="{% url 'accounts:user_view' request.user.id %}">Profile</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Create Quiz</a>
+              <a class="nav-link" href="{% url 'quiz:create_quiz' %}">Create Quiz</a>
             </li>
           {% endif %}
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              Categories
-            </a>
-            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              {% for category in categories %}
-                <a class="dropdown-item" href="{% url 'quiz:category' category.name %}">{{ category }}</a>
-              {% endfor %}
-            </div>
-          </li>
         </ul>
+        <form class="form-inline my-2 my-lg-0" action="{% url 'quiz:home' %}">
+          <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="q" value="{{ request.GET.q }}">
+          <select name="category" class="form-control mr-2">
+            {% if request.GET.category == 'All' %}
+              <option value="All" selected>All</option>
+            {% else %}
+              <option value="All">All</option>
+            {% endif %}
+            {% for category in categories %}
+              {% if request.GET.category == category.name %}
+                <option value="{{ category }}" selected>{{ category }}</option>
+              {% else %}
+                <option value="{{ category }}">{{ category }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+          <button class="btn btn-outline-info my-2 my-sm-0 mr-2" type="submit">Search</button>
+        </form>
         <ul class="navbar-nav">
           {% if user.is_authenticated %}
           <li class="nav-item">

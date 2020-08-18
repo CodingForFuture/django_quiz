@@ -1,0 +1,17 @@
+{% extends "quiz/base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+	Quiz App - Add Question
+{% endblock title %}
+
+{% block content %}
+	<h1>{% if update %}Update{% else %}Create{% endif %} Question</h1>
+	<hr>
+	<form method="post">
+		{% csrf_token %}
+		{{ form|crispy }}
+		<button type="submit" class="btn btn-primary">{% if update %}Update{% else %}Create{% endif %}</button>
+	</form>
+{% endblock content %}

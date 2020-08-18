@@ -5,11 +5,10 @@
 {% endblock title %}
 
 {% block content %}
-	<h1>Hello</h1>
+	<h1>Home Page</h1>
+	<hr>
 	{% for quiz in object_list %}
-		<div class="quiz">
-			<h2>{{ quiz.title }}</h2>
-			<hr>
-		</div>
+		{% include "quiz/quiz.html" %}
 	{% endfor %}
+	{% include "quiz/pagination.html" %}
 {% endblock content %}
