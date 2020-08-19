@@ -41,7 +41,7 @@ class QuizListView(ListView):
 
 
 def quiz_detail(request, pk):
-    quiz = Quiz.objects.get(pk=pk)
+    quiz = Quiz.objects.prefetch_related('questions', 'questions__answers').get(pk=pk)
     form = CommentForm()
     comments = quiz.comments.order_by('-date_commented').all()
     if request.method == 'POST':
@@ -120,30 +120,28 @@ def create_question(request, pk):
 
 @login_required
 def update_question(request, pk):
-    question = get_object_or_404(Question, pk=pk)
+    question = get_object_or_404(Question.objects.select_related('quiz').prefetch_related('answers'), pk=pk)
     if request.user != question.quiz.author:
         raise PermissionDenied()
 
     correct_answer = question.answers.filter(is_correct=True).first()
-    answer_2 = question.answers.filter(is_correct=False).all()[0]
-    answer_3 = question.answers.filter(is_correct=False).all()[1]
-    answer_4 = question.answers.filter(is_correct=False).all()[2]
-    initial = dict(question=question.question, correct_answer=correct_answer, answer_2=answer_2,
-                   answer_3=answer_3, answer_4=answer_4)
+    answers = [answer for answer in question.answers.filter(is_correct=False).all()]
+    initial = dict(question=question.question, correct_answer=correct_answer, answer_2=answers[0],
+                   answer_3=answers[1], answer_4=answers[2])
     if request.method == 'POST':
         form = QuestionAndAnswersForm(request.POST, initial=initial)
 
         if form.is_valid():
             question.question = form.cleaned_data['question']
             correct_answer.answer = form.cleaned_data['correct_answer']
-            answer_2.answer = form.cleaned_data['answer_2']
-            answer_3.answer = form.cleaned_data['answer_3']
-            answer_4.answer = form.cleaned_data['answer_4']
+            answers[0].answer = form.cleaned_data['answer_2']
+            answers[1].answer = form.cleaned_data['answer_3']
+            answers[2].answer = form.cleaned_data['answer_4']
             question.save()
             correct_answer.save()
-            answer_2.save()
-            answer_3.save()
-            answer_4.save()
+            answers[0].save()
+            answers[1].save()
+            answers[2].save()
             messages.success(request, 'Question has been updated.')
             return redirect('quiz:detail', pk=question.quiz.id)
     else:
@@ -188,7 +186,7 @@ class CommentDeleteView(DeleteView):
 
 @login_required
 def like(request, pk):
-    quiz = get_object_or_404(Quiz, pk=pk)
+    quiz = get_object_or_404(Quiz.objects.prefetch_related('likes').prefetch_related('dislikes'), pk=pk)
     if request.user in quiz.likes.all():
         quiz.likes.remove(request.user)
     else:
@@ -200,7 +198,7 @@ def like(request, pk):
 
 @login_required
 def dislike(request, pk):
-    quiz = get_object_or_404(Quiz, pk=pk)
+    quiz = get_object_or_404(Quiz.objects.prefetch_related('likes').prefetch_related('dislikes'), pk=pk)
     if request.user in quiz.dislikes.all():
         quiz.dislikes.remove(request.user)
     else:
